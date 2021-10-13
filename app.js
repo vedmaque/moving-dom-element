@@ -1,44 +1,44 @@
 const ball = document.querySelector('.circle')
+
+// начальное положение мяча
 const initialBallPosition = {
   x: window.innerWidth - ball.clientWidth - 50,
   y: window.innerHeight / 2 - ball.clientHeight / 2
 }
-ball.style.transform = `translate(${initialBallPosition.x}px, ${initialBallPosition.y}px)`
 
+// в этой переменной будем хранить текущее положение мяча
+const currentBallPosition = {
+  x: null,
+  y: null
+}
+
+setBallPosition(initialBallPosition)
+
+// флаг, показывающий, начали мы таскание элемента или просто мышкой возим туда-сюда
 let isMoving = false
-let initialMousePosition = {
+
+const prevMousePosition = {
   x: null,
-  y: null
-}
-let ballPositionStart = {
-  x: initialBallPosition.x,
-  y: initialBallPosition.y
-}
-let currentBallPosition = {
-  x: null,
-  y: null
+  y: null,
 }
 
+// по клику на элемент запоминаем координаты клика и выставляем флаг "движение начато"
 ball.addEventListener('mousedown', (e) => {
   isMoving = true
   ball.style.cursor = 'grabbing'
-  initialMousePosition.x = e.clientX
-  initialMousePosition.y = e.clientY
+  prevMousePosition.x = e.clientX
+  prevMousePosition.y = e.clientY
 })
 
+// по отпусканию мышки выставляем флаг "движение прекращено"
 ball.addEventListener('mouseup', () => {
   isMoving = false
   ball.style.cursor = 'grab'
-  ballPositionStart.x = currentBallPosition.x
-  ballPositionStart.y = currentBallPosition.y
 })
 
+// по даблклику возвращаем шар на изначальное место
 ball.addEventListener('dblclick', () => {
-  ball.style.transform = `translate(${initialBallPosition.x}px, ${initialBallPosition.y}px)`
-  currentBallPosition.x = initialBallPosition.x
-  currentBallPosition.y = initialBallPosition.y
-  ballPositionStart.x = initialBallPosition.x
-  ballPositionStart.y = initialBallPosition.y
+  setBallPosition(initialBallPosition)
 })
 
 document.body.addEventListener('mousemove', (e) => {
@@ -46,10 +46,26 @@ document.body.addEventListener('mousemove', (e) => {
     return
   }
 
-  const deltaMouseX = e.clientX - initialMousePosition.x
-  const deltaMouseY = e.clientY - initialMousePosition.y
-  currentBallPosition.x = ballPositionStart.x + deltaMouseX
-  currentBallPosition.y = ballPositionStart.y + deltaMouseY
+  // смотрим, на сколько мышка подвинулась
+  const deltaMouseX = e.clientX - prevMousePosition.x
+  const deltaMouseY = e.clientY - prevMousePosition.y
+
+  // на сколько, на столько надо и шар подвинуть
+  const newBallPosition = {
+    x: currentBallPosition.x + deltaMouseX,
+    y: currentBallPosition.y + deltaMouseY
+  }
+
+  setBallPosition(newBallPosition)
+
+  // не забудем обновить положение мышки
+  prevMousePosition.x = e.clientX
+  prevMousePosition.y = e.clientY
+})
+
+function setBallPosition(position) {
+  currentBallPosition.x = position.x
+  currentBallPosition.y = position.y
 
   ball.style.transform = `translate(${currentBallPosition.x}px, ${currentBallPosition.y}px)`
-})
+}
